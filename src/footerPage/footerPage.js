@@ -13,7 +13,8 @@ const Footer = () => {
         background: "linear-gradient(90deg, rgb(254 254 254) 0%, rgb(238 238 238) 50%, rgb(255 255 255) 100%)"
       }}
     >
-      <span style={{fontSize: "12px"}}>created by</span> <b><a href='https://t.me/volia_D'>Volia</a></b>
+      <span style={{fontSize: "14px"}}>created by</span> <b><a href='https://t.me/volia_D'>Volia</a></b><br/>
+      <span style={{fontSize: "12px"}}>Version 1.0.1</span>
     </footer>
   );
 };

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import Footer from "../footerPage/footerPage";
+import React, { useState } from "react";
 import PopupButton from '../PopupButton/PopupButton'; 
-
+import PrevPage from '../prevPage/prevPage';
 import {v4 as uuidv4} from 'uuid';
 import clipboardCopy from 'clipboard-copy';
 import Button from "@mui/material/Button";
@@ -26,8 +25,6 @@ import Typography from '@mui/material/Typography';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 
 
-const __pincode = "4570591973";
-const __license = "test923cd627e08fa7f2cf78a528";
 
 const LoginDiv = styled("div")({
   /*  backgroundColor: "#f2f2f2", */
@@ -73,7 +70,7 @@ const CustomDiv = styled("div")({
      fontSize: "16px",
      color: "black",
      display: "flex",
-     alignItems: "center",
+     /* alignItems: "center", */
      justifyContent: "center",
      flexDirection: "column",
      alignItems: "stretch" 
@@ -86,7 +83,7 @@ const CustomDiv = styled("div")({
      /* fontSize: "12px", */
      color: "black",
      display: "flex",
-     alignItems: "center",
+    /*  alignItems: "center", */
      justifyContent: "center",
      flexDirection: "row",
      alignItems: "stretch"
@@ -114,6 +111,7 @@ const MainComponent = () => {
   const [withdrawAmount, setWithdrawAmount] = useState(""); // Состояние для выдачи готівки
 
   const [loginFail, setLoginFail] = useState(false)
+  const [hasStatusShift, setHasStatusShift] = useState();
 
   // Хук для хранения данных о товарах соло чека
   const [products, setProducts] = useState([
@@ -200,7 +198,7 @@ const MainComponent = () => {
         setCloseZ(true)
         setZreport(false)
         localStorage.setItem("access_token", accessToken);
-       
+        await openedShiftOrNotWithStart();
         
       } else {
         console.error("Помилка авторизації:", response.status);
@@ -209,7 +207,7 @@ const MainComponent = () => {
     } catch (error) {
       console.error("Помилка авторизації:", error);
     }
-
+    
     setIsLoading(false);
   };
 
@@ -454,12 +452,14 @@ const MainComponent = () => {
 
     const paymentMethodMapping = {
       "Наложка": "Готівка",
+      "готівка": "Готівка",
       "Накладний": "Готівка",
       "Наложка р/р": "Картка",
       "Контроль оплаты": "Картка",
       "На карту": "Картка",
       "Карт": "Картка",
-      "Карточка": "Картка"
+      "Карточка": "Картка",
+      "на карту банка": "Картка"
       // Добавьте другие способы оплаты и их значения
     };
 
@@ -723,17 +723,98 @@ const createReceiptFromForm = async () => {
   };
 
   // конец метода
+  
+ // Получаем имя юзера
+  const getCashierProfile = async () => {
+    try {
+      const response = await fetch("https://api.checkbox.ua/api/v1/cashier/me", {
+       method: "GET",
+        headers: {
+          "accept": "application/json",
+          "X-Client-Name": "Integration",
+          "X-Client-Version": "1.0",
+          "X-License-Key": licenseKey, 
+           "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+          "Content-Type": "application/json",
+          "X-Device-ID": "1"
+        },
+      });
 
+      if (response.ok) {
+        const responseBody = await response.json(); // Преобразование тела ответа в JSON
+        console.log(responseBody)
+        console.log(responseBody.full_name)
+       setUserName(responseBody.full_name)
+       
+      } else {
+        console.error("Помилка отримання ПІБ:", response.status);
+       
+      }
+    } catch (error) {
+      console.error(error);
+    }
 
- 
+    
+  };
+
+  // Метод проверки авторизации кассира при старте
+  const openedShiftOrNotWithStart = async () => {
+    try {
+      const response = await fetch("https://api.checkbox.ua/api/v1/cashier/shift", {
+       
+        headers: {
+          "accept": "application/json",
+          "X-Client-Name": "Integration",
+          "X-Client-Version": "1.0",
+         /*  "X-License-Key": licenseKey, */
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const responseBody = await response.json(); // Преобразование тела ответа в JSON
+        console.log(responseBody)
+        console.log(responseBody.cash_register.active)
+        if (responseBody) {setHasStatusShift(responseBody.cash_register.active)} 
+        
+       
+       /*  setUserName(responseBody.cashier.full_name) */
+        setOpenStore("Зміна відкрита успішно");
+        statusShift();
+        checkTaxServiceConnection();
+        setZreport(false);
+        await fetchCashRegisterInfo();
+        await getCashierProfile();
+        
+
+       
+      } else {
+        console.error("Помилка:", response.status);
+       
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    
+  };
+
+  
 
   
   return (
     <CustomDiv>
         {!closeZ ? (
-          <div>
-            <LoginDiv>      
+          <div style={{width: "auto"}}>
+            <CustomDiv style={{marginTop: "30px", marginBottom: "-30px"}}> 
+                  <Typography variant="h5" component="h2">Авторизація через ChekBox</Typography>  
+            </CustomDiv>
+            
+            <LoginDiv >    
+                
                 <TextField
+                    style={{marginRight: "5px"}}
                     label="PIN-код касира"
                     variant="outlined"
                     color="success"
@@ -765,7 +846,9 @@ const createReceiptFromForm = async () => {
             <div style={{ display: 'flex', justifyContent: 'center', margin: "5px",  }}>
               {loginFail ? <Alert severity="warning">Помилка авторизації</Alert> : null}</div>
             </div>
-             
+             <CustomDiv>
+                       <PrevPage/>
+             </CustomDiv>
           </div>
         ): null}
                 
@@ -781,7 +864,9 @@ const createReceiptFromForm = async () => {
                       <div>
                           {/*   <button onClick={checkTaxServiceConnection}>Перевірити зв'язок з сервером ДПС</button><br/> */}
                           <Button disabled={!isOffline} onClick={openShift}>Відкрити зміну</Button>
-                          <Button disabled={isOffline} onClick={closeShift}>Закрити зміну</Button>  
+                          <Button disabled={isOffline} onClick={closeShift}>Закрити зміну</Button> 
+                          
+
                           <Button variant="outlined" color="error" size="small" style={{ fontSize: 12 }} onClick={handleSignout}>Вийти</Button>
                            
                       </div>
@@ -917,7 +1002,7 @@ const createReceiptFromForm = async () => {
       ))}
        <Stack style={{flexDirection: "column", alignItems: "center", marginTop: "5px"}} direction="row" spacing={1}>
              <Grid> 
-                <Button disabled={isOffline || products[0].name.length < 1 } variant="outlined" color="success" size="small" onClick={createReceiptFromForm}>Створити один чек</Button>
+                <Button disabled={!hasStatusShift && isOffline || products[0].name.length < 1 } variant="outlined" color="success" size="small" onClick={createReceiptFromForm}>Створити один чек</Button>
                 <Button variant="outlined" style={{margin: "5px"}} color="error" size="small" onClick={clearDataFromForm}>Видалити дані</Button>
             </Grid>
        </Stack>
@@ -934,7 +1019,7 @@ const createReceiptFromForm = async () => {
               style={{height: "auto"}}
               rows="6"
               cols="110"
-              placeholder="Вставте неопрацьовані дані в це поле..."
+              placeholder="Вставте неопрацьовані дані в це поле в наступному порядку: Назва товару => Споcіб оплати => Ціна товару"
               value={inputData}
               onChange={handleInputChange}
             />
@@ -1077,7 +1162,7 @@ const createReceiptFromForm = async () => {
               
                   <Grid item xs={1} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {urlCheck[index] && (
-                        <a href={urlCheck[index]}>Ссылка на чек</a>
+                        <a href={urlCheck[index]}>Посилання на чек</a>
                       )}
                          {!urlCheck[index] && urlCheck[index - 1] ? (<CircularProgress />) : null}
                 </Grid>
