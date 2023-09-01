@@ -776,7 +776,7 @@ const createReceiptFromForm = async () => {
         const responseBody = await response.json(); // Преобразование тела ответа в JSON
         console.log(responseBody)
         console.log(responseBody.cash_register.active)
-        if (responseBody) {setHasStatusShift(responseBody.cash_register.active)} 
+        if (!responseBody === null) {setHasStatusShift(responseBody.cash_register.active)} 
         
        
        /*  setUserName(responseBody.cashier.full_name) */
