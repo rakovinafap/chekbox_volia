@@ -776,7 +776,7 @@ const createReceiptFromForm = async () => {
         const responseBody = await response.json(); // Преобразование тела ответа в JSON
         console.log(responseBody)
         console.log(responseBody.cash_register.active)
-        if (!responseBody === null) {setHasStatusShift(responseBody.cash_register.active)} 
+        if (responseBody === null) {setHasStatusShift(responseBody.cash_register.active)} 
         
        
        /*  setUserName(responseBody.cashier.full_name) */
@@ -808,7 +808,7 @@ const createReceiptFromForm = async () => {
         {!closeZ ? (
           <div style={{width: "auto"}}>
             <CustomDiv style={{marginTop: "30px", marginBottom: "-30px"}}> 
-                  <Typography variant="h5" component="h2">Авторизація через ChekBox</Typography>  
+                  <Typography variant="h5" component="h2">Авторизація через CheckBox</Typography>  
             </CustomDiv>
             
             <LoginDiv >    
