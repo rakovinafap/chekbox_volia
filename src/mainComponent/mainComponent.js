@@ -851,7 +851,7 @@ const createReceiptFromForm = async () => {
             <div style={{ display: 'flex', justifyContent: 'center', margin: "5px",  }}>
               {loginFail ? <Alert severity="warning">Помилка авторизації</Alert> : null}</div>
             </div>
-            <CustomDiv><Typography>kek</Typography></CustomDiv>
+           
              <CustomDiv>
                        <PrevPage/>
              </CustomDiv>
