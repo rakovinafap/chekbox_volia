@@ -14,7 +14,7 @@ const Footer = () => {
       }}
     >
       <span style={{fontSize: "14px"}}>created by</span> <b><a href='https://t.me/volia_D'>Volia</a></b><br/>
-      <span style={{fontSize: "12px"}}>Version 1.0.1</span>
+      <span style={{fontSize: "12px"}} title='Добавлены способы оплаты: "Післяплата" и "Безготівка"'>Version 1.0.2</span>
     </footer>
   );
 };

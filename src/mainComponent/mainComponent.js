@@ -369,15 +369,14 @@ const MainComponent = () => {
   const createReceiptAndFetchHtml = async (data) => {
 
    let defaultPayMethod = "CASH";
-   if (data.paymentMethod === "Картка") {
+   if (data.paymentMethod === "Безготівка" || data.paymentMethod === "Післяплата") {
     defaultPayMethod = "CASHLESS";
    } 
+   
 
    let sumCheck = data.productQuantity * (parseFloat(data.productPrice) * 100); 
     const receiptData = {
       id: uuidv4(),
-     /*  cashier_name: "Имя кассира",
-      departament: "Имя департамента", */
       goods: [
         {
           good: {
@@ -393,7 +392,8 @@ const MainComponent = () => {
       payments: [
         {
           type: defaultPayMethod,
-          value: sumCheck, 
+          value: sumCheck,
+          label: data.paymentMethod
         },
       ],
     };
@@ -455,14 +455,13 @@ const MainComponent = () => {
       "налож": "Готівка",
       "готівка": "Готівка",
       "Накладний": "Готівка",
-      "Наложка р/р": "Картка",
-      "Контроль оплаты": "Картка",
-      "На карту": "Картка",
-      "картка": "Картка",
-      "Карточка": "Картка",
-      "на карту банка": "Картка",
-      "контр": "Картка"
-      
+      "Наложка р/р": "Післяплата",
+      "Контроль оплаты": "Післяплата",
+      "На карту": "Безготівка",
+      "картка": "Безготівка",
+      "Карточка": "Безготівка",
+      "на карту банка": "Безготівка",
+      "контр": "Післяплата"
       // Добавьте другие способы оплаты и их значения
     };
 
@@ -529,7 +528,7 @@ const removeProduct = (index) => {
 const createReceiptFromForm = async () => {
   try {
     let defaultPayMethod = "CASH"; // Значение по умолчанию для способа оплаты
-    if (paymentMethod === "Картка") {
+    if (paymentMethod === "Післяплата" || paymentMethod === "Безготівка") {
       defaultPayMethod = "CASHLESS";
     }
 
@@ -559,6 +558,7 @@ const createReceiptFromForm = async () => {
         {
           type: defaultPayMethod,
           value: totalAmount,
+          label: paymentMethod
         },
       ],
     };
@@ -840,18 +840,22 @@ const createReceiptFromForm = async () => {
                     setLicenseKey(e.target.value);
                     }}
                 />
+                
                 <Button variant="contained" color="primary" size="small" style={{ fontSize: 12, margin: 5 }}   onClick={handleLogin} disabled={isLoading}>
                       {isLoading ? "Завантаження..." : "Увійти"}
-                </Button>
-            </LoginDiv>
+                </Button><br/>
                
+            </LoginDiv>
+            
             <div style={{ marginTop: '10px', margin: '0 auto', textAlign: 'center',  }}>
             <div style={{ display: 'flex', justifyContent: 'center', margin: "5px",  }}>
               {loginFail ? <Alert severity="warning">Помилка авторизації</Alert> : null}</div>
             </div>
+            <CustomDiv><Typography>kek</Typography></CustomDiv>
              <CustomDiv>
                        <PrevPage/>
              </CustomDiv>
+            
           </div>
         ): null}
                 
@@ -944,9 +948,10 @@ const createReceiptFromForm = async () => {
         <div>
           
         <Divider style={{display: "flex", flexWrap: "wrap"}}>
-            <Select size="small" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                <MenuItem value="Готівка">Готівка</MenuItem>
-                <MenuItem value="Картка">Картка</MenuItem>
+            <Select size="small"  value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                  <MenuItem value="Безготівка">Безготівка</MenuItem>
+                  <MenuItem value="Післяплата">Післяплата</MenuItem>
+                  <MenuItem value="Готівка">Готівка</MenuItem>
            </Select>
        </Divider>
       {products.map((product, index) => (
@@ -1126,13 +1131,14 @@ const createReceiptFromForm = async () => {
                 </Grid>
                 <Grid item xs={0}>
                  <Select
-                 
-                  size="small" 
+                  size="small"
+                  style={{ "minWidth": "150px" }} 
                   value={data.paymentMethod}
                   onChange={(e) => handlePaymentMethodChange(index, e.target.value)}
                 >
-                  <MenuItem value="Готівка">Готівка</MenuItem>
-                  <MenuItem value="Картка">Картка</MenuItem>
+                  <MenuItem   value="Готівка">Готівка</MenuItem>
+                  <MenuItem value="Післяплата">Післяплата</MenuItem>
+                  <MenuItem value="Безготівка">Безготівка</MenuItem>
                 </Select>
                 </Grid>
                 <Grid item xs={1}>
