@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PopupButton from '../PopupButton/PopupButton'; 
 import PrevPage from '../prevPage/prevPage';
 import {v4 as uuidv4} from 'uuid';
@@ -329,6 +329,8 @@ const MainComponent = () => {
     
       if (response.ok) {
         const data = await response.json();
+        console.log(response.ok)
+        console.log(data)   
         
       
         setZOutput(data);
@@ -483,6 +485,11 @@ const MainComponent = () => {
     console.log("Все ссылки скопированы");
   };
 
+  const copyOneLink = () => {
+    clipboardCopy(oneCheckUrl);
+    console.log("Одна ссылка скопирована"); 
+  };
+
 
   const createAllReceiptsAndFetchHtml = async () => {
     for (const [index, data] of parsedData.entries()) {
@@ -606,6 +613,7 @@ const createReceiptFromForm = async () => {
     setParsedData([]);
     setUrlCheck([]);
     setProductQuantities([]);
+    setInputData("");
   }
 
   // Код для получения, записи и редактирования баланса 
@@ -803,8 +811,35 @@ const createReceiptFromForm = async () => {
     
   };
 
+  const calculateTotal = () => {
+    return products.reduce((total, product) => {
+      const productTotal = product.quantity * product.price;
+      return total + productTotal;
+    }, 0);
+  };
+
   
 
+  console.log("parseData" + parsedData.length)
+  console.log("url" + urlCheck.length)
+
+ // TODO: Тесты тайтла + update page;
+
+  useEffect(() => {
+    document.title = `Масове створення чеків: ${urlCheck?.length} | ${parsedData?.length}`;
+
+    if (urlCheck.length === parsedData.length) {
+        document.title = "Масове створення чеків";
+    }
+
+    return () => {
+      document.title = "Масове створення чеків";
+    }
+
+  }, [urlCheck, parsedData]);
+
+  
+  
   
   return (
     <CustomDiv>
@@ -1008,14 +1043,21 @@ const createReceiptFromForm = async () => {
           </Grid>
         </Grid>
       ))}
+       <div>
+       <Typography variant="subtitle1" gutterBottom style={{textAlign: "right", fontSize: "12px", color: "grey"}}><b>Сума: {calculateTotal()}</b></Typography>
+       <hr/>
+      </div>
        <Stack style={{flexDirection: "column", alignItems: "center", marginTop: "5px"}} direction="row" spacing={1}>
              <Grid> 
                 <Button disabled={!hasStatusShift && isOffline || products[0].name.length < 1 } variant="outlined" color="success" size="small" onClick={createReceiptFromForm}>Створити один чек</Button>
                 <Button variant="outlined" style={{margin: "5px"}} color="error" size="small" onClick={clearDataFromForm}>Видалити дані</Button>
+                <Button disabled={!oneCheckUrl} variant="outlined" size="small" color="secondary" onClick={copyOneLink}>Копіювати одне посилання</Button> 
             </Grid>
        </Stack>
         <CustomDiv style={{margin: "5px"}}>
-          <a href={oneCheckUrl}>{oneCheckUrl}</a>
+          {oneCheckUrl ? (
+            <a href={oneCheckUrl}>Посилання на чек</a>
+          ): null}
         </CustomDiv>
       </div>
         </AccordionDetails>
@@ -1136,7 +1178,7 @@ const createReceiptFromForm = async () => {
                   value={data.paymentMethod}
                   onChange={(e) => handlePaymentMethodChange(index, e.target.value)}
                 >
-                  <MenuItem   value="Готівка">Готівка</MenuItem>
+                  <MenuItem value="Готівка">Готівка</MenuItem>
                   <MenuItem value="Післяплата">Післяплата</MenuItem>
                   <MenuItem value="Безготівка">Безготівка</MenuItem>
                 </Select>
