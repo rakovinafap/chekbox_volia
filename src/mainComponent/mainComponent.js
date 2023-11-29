@@ -1141,7 +1141,7 @@ const createReceiptFromForm = async () => {
                      Всього: <span style={{ float: 'right', marginRight: "4px"  }}>{(zOutput.balance.card_sales +zOutput.balance.cash_sales)/100}.00</span>
                     </Typography>
                     <Typography style={{margin: "4px", fontSize: "12px"}}>
-                      Кількість створених чеків: <span style={{ float: 'right', marginRight: "4px"  }}>{zOutput.z_report.sell_receipts_count}</span>
+                      Кількість створених чеків: <span style={{ float: 'right', marginRight: "4px"  }}>{zOutput?.z_report?.sell_receipts_count}</span>
                     </Typography>
                     <Typography align="center">
                     =========================================
