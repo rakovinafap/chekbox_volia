@@ -100,11 +100,15 @@ const MainComponent = () => {
   const [licenseKey, setLicenseKey] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(true);
+  console.log(isOffline);
   const [taxServiceStatus, setTaxServiceStatus] = useState(null);
   const [openStore, setOpenStore] = useState(null);
   const [userName, setUserName] = useState(null);
   const [urlCheck, setUrlCheck] = useState([]);
   const [creatingLink, setCreatingLink] = useState(false);
+  const [myUuid, setMyUuid] = useState();
+  console.log(licenseKey);
+  
 
   const [balanceUser, setBalanceUser] = useState(null);
   const [depositAmount, setDepositAmount] = useState(""); // Состояние для внесения готівки
@@ -150,20 +154,24 @@ const MainComponent = () => {
  
 
 
-  const fetchCashRegisterInfo = async () => {
+  /*  const fetchCashRegisterInfo = async () => {
     try {
       const response = await fetch("https://api.checkbox.ua/api/v1/cash-registers/info", {
+        method: "GET",
         headers: {
           accept: "application/json",
           "X-Client-Name": "Integration",
           "X-Client-Version": "1.0",
           "X-License-Key": licenseKey,
-          "Content-Type": "application/json",
+         
         },
       });
 
+      
+        console.log(response.json());
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
        
         setIsOffline(data.offline_mode);
       } else {
@@ -171,8 +179,11 @@ const MainComponent = () => {
       }
     } catch (error) {
       console.error("Помилка отримання інформації:", error);
-    }
+    } 
   };
+ */
+ 
+  
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -239,8 +250,8 @@ const MainComponent = () => {
 
   const openShift = async () => {
     let myuuid = uuidv4();
-   
-    
+    setMyUuid(myuuid);
+  
     try {
       const response = await fetch("https://api.checkbox.ua/api/v1/shifts", {
         method: "POST",
@@ -267,8 +278,11 @@ const MainComponent = () => {
         setZreport(false);
         
   
-        // Вызываем fetchCashRegisterInfo только после успешного открытия смены
-        fetchCashRegisterInfo();
+        
+       /* fetchCashRegisterInfo(); */
+       console.log("is Offline must be FALSE")
+       setIsOffline(false)
+
       } else {
         console.error("Помилка відкриття зміни:", response.status);
         
@@ -754,6 +768,7 @@ const createReceiptFromForm = async () => {
       if (response.ok) {
         const responseBody = await response.json(); // Преобразование тела ответа в JSON
         console.log(responseBody)
+        console.log(responseBody.id)
         console.log(responseBody.full_name)
        setUserName(responseBody.full_name)
        
@@ -767,6 +782,14 @@ const createReceiptFromForm = async () => {
 
     
   };
+
+  const handleCheckOnline = () => {
+    if (taxServiceStatus == "DONE") {
+      setIsOffline(false);
+    }
+  }
+
+  console.log("tax" + taxServiceStatus);
 
   // Метод проверки авторизации кассира при старте
   const openedShiftOrNotWithStart = async () => {
@@ -793,9 +816,11 @@ const createReceiptFromForm = async () => {
        /*  setUserName(responseBody.cashier.full_name) */
         setOpenStore("Зміна відкрита успішно");
         statusShift();
-        checkTaxServiceConnection();
+        await checkTaxServiceConnection();
         setZreport(false);
-        await fetchCashRegisterInfo();
+       /*  await fetchCashRegisterInfo(); */
+        await handleCheckOnline()
+        setIsOffline(false);
         await getCashierProfile();
         
 
