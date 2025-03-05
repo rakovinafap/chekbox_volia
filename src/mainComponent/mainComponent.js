@@ -385,9 +385,15 @@ const MainComponent = () => {
   const createReceiptAndFetchHtml = async (data) => {
 
    let defaultPayMethod = "CASH";
-   if (data.paymentMethod === "Безготівка" || data.paymentMethod === "Післяплата") {
+   if (data.paymentMethod === "Безготівка") {
     defaultPayMethod = "CASHLESS";
-   } 
+   } else if (data.paymentMethod === "Платіж через інтегратора EVOPAY") {
+    defaultPayMethod = "CASHLESS";
+   } else if (data.paymentMethod === "Платіж через інтегратора NOVAPAY") {
+    defaultPayMethod = "CASHLESS";
+   }
+
+   
    
 
    let sumCheck = data.productQuantity * (parseFloat(data.productPrice) * 100); 
@@ -471,14 +477,15 @@ const MainComponent = () => {
       "налож": "Готівка",
       "готівка": "Готівка",
       "Накладний": "Готівка",
-      "Наложка р/р": "Післяплата",
-      "Контроль оплаты": "Післяплата",
+      "Наложка р/р": "Безготівка",
+      "Контроль оплаты": "Безготівка",
       "карта": "Безготівка",
       "На карту": "Безготівка",
       "картка": "Безготівка",
       "Карточка": "Безготівка",
       "на карту банка": "Безготівка",
-      "контр": "Післяплата"
+      "контр": "Платіж через інтегратора EVOPAY", // EVOPAY
+      "новапей": "Платіж через інтегратора NOVAPAY" // NOVAPAY
       // Добавьте другие способы оплаты и их значения
     };
 
@@ -550,7 +557,11 @@ const removeProduct = (index) => {
 const createReceiptFromForm = async () => {
   try {
     let defaultPayMethod = "CASH"; // Значение по умолчанию для способа оплаты
-    if (paymentMethod === "Післяплата" || paymentMethod === "Безготівка") {
+    if (paymentMethod === "Безготівка") {
+      defaultPayMethod = "CASHLESS";
+    } else if (paymentMethod === "Платіж через інтегратора EVOPAY") {
+      defaultPayMethod = "CASHLESS";
+    } else if (paymentMethod === "Платіж через інтегратора NOVAPAY") {
       defaultPayMethod = "CASHLESS";
     }
 
@@ -1011,7 +1022,8 @@ const createReceiptFromForm = async () => {
         <Divider style={{display: "flex", flexWrap: "wrap"}}>
             <Select size="small"  value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
                   <MenuItem value="Безготівка">Безготівка</MenuItem>
-                  <MenuItem value="Післяплата">Післяплата</MenuItem>
+                  <MenuItem value="Платіж через інтегратора EVOPAY">EVOPAY</MenuItem>
+                  <MenuItem value="Платіж через інтегратора NOVAPAY">NOVAPAY</MenuItem>
                   <MenuItem value="Готівка">Готівка</MenuItem>
            </Select>
        </Divider>
@@ -1204,9 +1216,10 @@ const createReceiptFromForm = async () => {
                   value={data.paymentMethod}
                   onChange={(e) => handlePaymentMethodChange(index, e.target.value)}
                 >
-                  <MenuItem value="Готівка">Готівка</MenuItem>
-                  <MenuItem value="Післяплата">Післяплата</MenuItem>
                   <MenuItem value="Безготівка">Безготівка</MenuItem>
+                  <MenuItem value="Платіж через інтегратора EVOPAY">EVOPAY</MenuItem>
+                  <MenuItem value="Платіж через інтегратора NOVAPAY">NOVAPAY</MenuItem>
+                  <MenuItem value="Готівка">Готівка</MenuItem>
                 </Select>
                 </Grid>
                 <Grid item xs={1}>
